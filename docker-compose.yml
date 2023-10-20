@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: my_nginx
+    volumes:
+      - ./nginx-reverse-proxy.conf:/etc/nginx/nginx.conf
+      - ./static_pages:/usr/share/nginx/html/
+    depends_on:
+      - php-app
+    ports:
+      - "8080:80"
+
+  php-app:
+    build:
+      dockerfile: Dockerfile
+    container_name: my_php_app
+    volumes:
+      - ./static_pages:/var/www/html
+    expose:
+      - "9000"
+    depends_on:
+      - db
+
+
+  db:
+    platform: linux/x86_64
+    image: mysql:5.7
+    container_name: my_db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: appDB
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3307:3306"
+
+
+
